@@ -106,37 +106,69 @@ export class Cache extends Map {
   /**
   * fetches something from pre-defined path.
   * @param {String} snowflake that identify something
-  * @returns {Promise<Object>}
+  * @returns {Promise<Unknown>}
   */
   async fetch(snowflake) {
-    const data = await this.client.api.get(this.path + snowflake)
-    
-    // if fetching is success...
-    if(data) {
-      // timestamp when data is fetched
-      Object.defineProperties(data, '__timestamp', { value: Date.now(), writable: true })
+    try {
+      const data = await this.client.api.get(this.path + snowflake)
       
-      // if the result type is defined by the user...
+      Object.defineProperty(data, '__timestamp', { value: Date.now(), writable: true })
+      
       if(this.fetchReturnType) {
-        // if its defined as a function rather than a class
         if(typeof(this.fetchReturnType) === 'function') {
-          super.set(data.id || data.name, new (this.fetchReturnType(data))(this.client, data))
-          return new (this.fetchReturnType(data))(this.client, data)        
+          super.set(data.id || data.name, new (this.fetchReturnType(data))(this.client, data) )
         }
         else {
-          super.set(data.id || data.name, new (this.fetchReturnType)(this.client, data))
-          return new (this.fetchReturnType)(this.client, data)
+          super.set(data.id || data.name, new (this.fetchReturnType)(this.client, data)) 
         }
+        
+        this._debug('fetching success')
+        return super.get(data.id || data.name)
       }
       
-      // doesn't have any result type
       else {
-        this.set(data.id || data.name, data)
+        super.set(data.id || data.name, data)
+        this._debug('fetching success')
         return data
       }
+      
     }
+    catch (err) {
+      this._debug(`error while fetching ${snowflake}. Status Code: ${err.statusCode}. Message: ${err.message}`)
+      throw err
+    }
+  }
+  
+  async fetchAll() {
+    const baseURL = this.path.endsWith('/') ? this.path.slice(0, -1) : this.path
+    try {
+      const Data = await this.client.api.get(baseURL)
+      
+      Data.forEach(data => {
+        Object.defineProperty(data, '__timestamp', {value: Date.now(), writable: true})
+        super.set(data.id || data.name, new (this.fetchReturnType)(this.client, data))
+      })
+      this._debug('success fetched all data from the url.')
+      return true
+    }
+    catch (err) {
+      this._debug('an error has occured while fetching all data!.\n' + `Status Code: ${err.statusCode}\nMessage: ${err.message}`)
+      throw err
+    }
+  }
+  
+  /**
+  * clear an expired data
+  * @returns {Boolean} always true
+  */
+  clearCache() {
     
-    // error
-    return this._debug(`there was an error while fetching the snowflake: ${snowflake}`)
+    this.filter(data => {
+        return (data.__timestamp + this.expiredTime) <= Date.now() 
+    })
+    
+    this._debug('clearing cache...')
+    
+    return true
   }
 }
