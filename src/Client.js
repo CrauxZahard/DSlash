@@ -15,10 +15,13 @@ export class Client {
       },
       application: {
         value: {
-          id: data.applicationId,
+          id: data.applicationId, //needed to make slash command
           route: `https://discord.com/api/v9/applications/${data.applicationId}/`,
-          publicKey: data.publicKey
+          publicKey: data.publicKey //not needed
         }
+      },
+      token: {
+        value: data.token 
       }
     })
     
