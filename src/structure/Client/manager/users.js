@@ -5,7 +5,7 @@ export class ClientUsers extends Cache {
   constructor(client, options) {
     super(client, {
       path: 'https://discord.com/api/v9/users/',
-      fetchReturn: User,
+      fetchReturnType: User,
       expiredTime: options.expiredTime
     })
   }
