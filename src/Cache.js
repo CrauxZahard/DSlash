@@ -105,8 +105,8 @@ export class Cache extends Map {
   
   /**
   * fetches something from pre-defined path.
-  * @param {String} snowflake that identify something
-  * @returns {Promise<Unknown>}
+  * @param {String} snowflake a snowflake that identify something
+  * @returns {Promise<Any>}
   */
   async fetch(snowflake) {
     try {
@@ -114,23 +114,20 @@ export class Cache extends Map {
       
       Object.defineProperty(data, '__timestamp', { value: Date.now(), writable: true })
       
-      if(this.fetchReturnType) {
-        if(typeof(this.fetchReturnType) === 'function') {
-          super.set(data.id || data.name, new (this.fetchReturnType(data))(this.client, data) )
-        }
-        else {
-          super.set(data.id || data.name, new (this.fetchReturnType)(this.client, data)) 
-        }
-        
-        this._debug('fetching success')
-        return super.get(data.id || data.name)
+      switch(typeof(this.fetchReturnType)) {
+        case 'function':
+          super.set(data.id || data.name, new (this.fetchReturnType(data))(this.client, data))
+          break;
+          
+        case 'undefined':
+          super.set(data.id || data.name, data)
+          break;
+          
+        default:
+          super.set(data.id || data.name, new (this.fetchReturnType)(this.client, data))
       }
-      
-      else {
-        super.set(data.id || data.name, data)
-        this._debug('fetching success')
-        return data
-      }
+      this._debug('fetching success')
+      return super.get(data.id || data.name)
       
     }
     catch (err) {
