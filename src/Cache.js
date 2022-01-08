@@ -18,7 +18,7 @@ export class Cache extends Map {
     })
     
     if(this.expiredTime >= 0) {
-      setInterval(this.clearCache(), this.expiredTime)
+      this.#intervalId = setInterval(this.clearCache, this.expiredTime)
     }
   }
   
@@ -167,5 +167,17 @@ export class Cache extends Map {
     this._debug('clearing cache...')
     
     return true
+  }
+  
+  #resetState() {
+    clearInterval(this.#intervalId)
+    this.#intervalId = setInterval(this.clearCache, this.expiredTime)
+  }
+  
+  changeExpiredTime(time) {
+    this.expiredTime = time
+    this.#resetState()
+    this._debug('changed expire time into ' + time)
+    return;
   }
 }
