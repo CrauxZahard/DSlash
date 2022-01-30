@@ -8,4 +8,5 @@ export class ClientGuilds extends Cache {
       fetchReturnType: Guild,
       expiredTime: options.expiredTime
     })
+  }
 }
