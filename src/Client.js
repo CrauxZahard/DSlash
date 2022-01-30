@@ -4,6 +4,7 @@ import ClientGuilds from './structure/Client/manager/guilds'
 import ClientChannels from './structure/Client/manager/channels'
 import BaseInteraction from './structure/Interaction/baseInteraction'
 import Fastify from 'fastify'
+import Debug from './util/debugger'
 
 export class Client {
   constructor(data = {}) {
@@ -16,12 +17,14 @@ export class Client {
       application: {
         value: {
           id: data.applicationId, //needed to make slash command
-          route: `https://discord.com/api/v9/applications/${data.applicationId}/`,
-          publicKey: data.publicKey //not needed
+          route: `https://discord.com/api/v9/applications/${data.applicationId}/`
         }
       },
       token: {
         value: data.token 
+      },
+      _debugger: {
+        value: new Debug('Client', this)
       }
     })
     
@@ -34,9 +37,11 @@ export class Client {
   
   async addCommand(data, guildId = null) {   
     if(guildId === null) {
+      this._debugger.debug('trying to make a global slash command...')
       return (await this.api.post(this.application.route + 'commands', data))
     } 
     else {
+      this._debugger.debug('trying to make slash command in guild id: ' + guildId)
       return (await this.api.post(`${this.application.route}guilds/${guildId}/commands`, data))
     }
   }

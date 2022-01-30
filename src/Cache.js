@@ -1,3 +1,5 @@
+import Debug from './util/debugger.js';
+
 export class Cache extends Map {
   constructor(client, opt = {}) {
     super()
@@ -14,11 +16,14 @@ export class Cache extends Map {
       },
       expiredTime: {
         value: opt.expiredTime || 21_600_000
+      },
+      _debugger: {
+        value: new Debug('Cache', client)
       }
     })
     
     if(this.expiredTime >= 0) {
-      this.#intervalId = setInterval(this.clearCache, this.expiredTime)
+      setInterval(this.clearCache, this.expiredTime)
     }
   }
   
@@ -51,15 +56,6 @@ export class Cache extends Map {
   
   
   /**
-  * @param {String} text to display
-  * @returns {Void}
-  */
-  _debug(text, title) {
-    return this.client.emit('debug', `[${title ?? 'Cache'}]: ${text}`)
-  }
-  
-  
-  /**
   * filter a cache.
   * @param {Function} fn function to filter
   * @returns {Cache}
@@ -70,14 +66,15 @@ export class Cache extends Map {
     for(const [key, value] of this) {
       if(!fn(value, key)) this.delete(key)
     }
+
     return this
   }
   
   
   /**
-  * @param {Integer} amount to return. Default: 1
-  * @param {String} type of Map to return. Valid choice: 'key', 'value', 'array'. Default: 'value'
-  * @returns {String | Array<Object>} either key, value, or array of object with key and value pairs
+  * @param {Integer} amount amount to return. Default: 1
+  * @param {String} type type of Map to return. Valid choice: 'key', 'value', or 'array'. Default: 'value'
+  * @returns {String | Array<any>} either key, value, or Object[]<key, value>
   */
   first(amount = 1, type = 'value') {
     if(amount <= 0) return new Error('\'amount\' parameter should be equals or greater than 1')
@@ -126,12 +123,12 @@ export class Cache extends Map {
         default:
           super.set(data.id || data.name, new (this.fetchReturnType)(this.client, data))
       }
-      this._debug('fetching success')
+      this._debugger.debug('fetching success')
       return super.get(data.id || data.name)
       
     }
     catch (err) {
-      this._debug(`error while fetching ${snowflake}. Status Code: ${err.statusCode}. Message: ${err.message}`)
+      this._debugger.debug(`error while fetching ${snowflake}. Status Code: ${err.statusCode}. Message: ${err.message}`)
       throw err
     }
   }
@@ -145,11 +142,11 @@ export class Cache extends Map {
         Object.defineProperty(data, '__timestamp', {value: Date.now(), writable: true})
         super.set(data.id || data.name, new (this.fetchReturnType)(this.client, data))
       })
-      this._debug('success fetched all data from the url.')
+      this._debugger.debug('success fetched all data from the url.')
       return true
     }
     catch (err) {
-      this._debug('an error has occured while fetching all data!.\n' + `Status Code: ${err.statusCode}\nMessage: ${err.message}`)
+      this._debugger.debug('an error has occured while fetching all data!.\n' + `Status Code: ${err.statusCode}\nMessage: ${err.message}`)
       throw err
     }
   }
@@ -164,20 +161,9 @@ export class Cache extends Map {
         return (data.__timestamp + this.expiredTime) <= Date.now() 
     })
     
-    this._debug('clearing cache...')
+    this._debugger.debug('clearing cache...')
     
     return true
   }
   
-  #resetState() {
-    clearInterval(this.#intervalId)
-    this.#intervalId = setInterval(this.clearCache, this.expiredTime)
-  }
-  
-  changeExpiredTime(time) {
-    this.expiredTime = time
-    this.#resetState()
-    this._debug('changed expire time into ' + time)
-    return;
-  }
 }
