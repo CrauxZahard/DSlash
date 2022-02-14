@@ -23,8 +23,8 @@ export class Client {
       token: {
         value: data.token 
       },
-      _debugger: {
-        value: new Debug('Client', this)
+      _debug: {
+        value: (new Debug('Client', this)).debug
       }
     })
     
@@ -37,11 +37,11 @@ export class Client {
   
   async addCommand(data, guildId = null) {   
     if(guildId === null) {
-      this._debugger.debug('trying to make a global slash command...')
+      this._debug('trying to make a global slash command...')
       return (await this.api.post(this.application.route + 'commands', data))
     } 
     else {
-      this._debugger.debug('trying to make slash command in guild id: ' + guildId)
+      this._debug('trying to make slash command in guild id: ' + guildId)
       return (await this.api.post(`${this.application.route}guilds/${guildId}/commands`, data))
     }
   }

@@ -17,8 +17,8 @@ export class Cache extends Map {
       expiredTime: {
         value: opt.expiredTime || 21_600_000
       },
-      _debugger: {
-        value: new Debug('Cache', client)
+      _debug: {
+        value: (new Debug('Cache', client)).debug
       }
     })
     
@@ -58,7 +58,7 @@ export class Cache extends Map {
   /**
   * filter a cache.
   * @param {Function} fn function to filter
-  * @returns {Cache}
+  * @returns {Cache} Cache class
   */
   filter(fn) {
     if(typeof(fn) !== 'function') throw new Error('Supplied parameter is not a function')
@@ -103,7 +103,7 @@ export class Cache extends Map {
   /**
   * fetches something from pre-defined path.
   * @param {String} snowflake a snowflake that identify something
-  * @returns {Promise<Any>}
+  * @returns {Promise<Any>} resolves with data, or rejects with an instance of Error
   */
   async fetch(snowflake) {
     try {
@@ -123,16 +123,21 @@ export class Cache extends Map {
         default:
           super.set(data.id || data.name, new (this.fetchReturnType)(this.client, data))
       }
-      this._debugger.debug('fetching success')
+
+      this._debug('fetching success')
       return super.get(data.id || data.name)
       
     }
     catch (err) {
-      this._debugger.debug(`error while fetching ${snowflake}. Status Code: ${err.statusCode}. Message: ${err.message}`)
+      this._debug(`error while fetching ${snowflake}. Status Code: ${err.statusCode}. Message: ${err.message}`)
       throw err
     }
   }
   
+  /** 
+  * fetches all datas from this url
+  * @returns {Promise<boolean | Error>} resolves with true, or rejects with instance of Error
+  */
   async fetchAll() {
     const baseURL = this.path.endsWith('/') ? this.path.slice(0, -1) : this.path
     try {
@@ -142,11 +147,11 @@ export class Cache extends Map {
         Object.defineProperty(data, '__timestamp', {value: Date.now(), writable: true})
         super.set(data.id || data.name, new (this.fetchReturnType)(this.client, data))
       })
-      this._debugger.debug('success fetched all data from the url.')
+      this._debug('success fetched all data from the url.')
       return true
     }
     catch (err) {
-      this._debugger.debug('an error has occured while fetching all data!.\n' + `Status Code: ${err.statusCode}\nMessage: ${err.message}`)
+      this._debug('an error has occured while fetching all data!.\n' + `Status Code: ${err.statusCode}\nMessage: ${err.message}`)
       throw err
     }
   }
@@ -161,7 +166,7 @@ export class Cache extends Map {
         return (data.__timestamp + this.expiredTime) <= Date.now() 
     })
     
-    this._debugger.debug('clearing cache...')
+    this._debug('clearing cache...')
     
     return true
   }

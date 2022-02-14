@@ -1,5 +1,5 @@
 import Cache from '../../../Cache'
-import User from '../../User/user'
+import User from '../../User/User'
 
 export class ClientUsers extends Cache {
   constructor(client, options) {

@@ -5,12 +5,13 @@ import DmChannel from './DmChannel.js'
 export class Channel {
     constructor(client, rawData) {
         Object.defineProperty(this, 'client', {value: client})
-        Object.defineProperty(this, 'rawData', {value: rawData})
+        Object.defineProperty(this, '_rawData', {value: rawData})
         this.id = rawData.id
-        this.type = rawData.type
+        this.type = rawData.type 
     }
 
     mention() {
+        if(this.type === 1) return `<@${this._rawData.recipients[0].id}>`
         return `<#${this.id}>`
     }
 

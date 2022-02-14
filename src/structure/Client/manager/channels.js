@@ -1,5 +1,5 @@
 import Cache from '../../../Cache'
-import Channel from '../../Channel/channel'
+import Channel from '../../Channel/Channel'
 
 export class ClientChannels extends Cache {
   constructor(client, options) {

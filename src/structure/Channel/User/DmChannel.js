@@ -1,13 +1,11 @@
-import Channel from './Channel.js';
-import ChannelMessages from './manager/Messages.js';
-import Message from '../message/Message.js'
+import Message from '../../Message/Message.js'
+import Channel from '../Channel.js'
 
-
-export class TextChannel extends Channel {
+export class DmChannel extends Channel {
   constructor(client, rawData) {
+    Object.defineProperty(this, 'client', {value: client})
     super(client, {id: rawData.id, type: rawData.type})
-    this.guildId = rawData.guildId
-    this.messages = new ChannelMessages(client, {id: rawData.id, options: rawData.options})
+    this.recipients = rawData.recipients
   }
   
   
@@ -32,6 +30,5 @@ export class TextChannel extends Channel {
     }
     
   }
-  
-  
+    
 }

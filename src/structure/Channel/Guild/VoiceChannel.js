@@ -1,16 +1,17 @@
-import Channel from './Channel.js';
+import GuildChannel from './GuildChannel.js';
 
 
-export class VoiceChannel extends Channel {
+export class VoiceChannel extends GuildChannel {
   constructor(client, rawData) {
     super(client, {id: rawData.id, type: rawData.type})
-    this.guildId = rawData.guildId
     this.bitrate = rawData.bitrate
     this.userLimit = rawData.user_limit
     this.name = rawData.name
     this.parentId = rawData.parent_id
     this.region = rawData.rtc_region
     this.position = rawData.position
+    this.nsfw = rawData.nsfw
+    this.videoQuality = rawData.video_quality_mode
   }
   
   
@@ -23,7 +24,7 @@ export class VoiceChannel extends Channel {
       limit: 5 // 0 for no-limit, or in range of 1 to 99
     }
     */
-    const finalData = {}
+    let finalData = {}
     if(data.name) finalData.name = data.name.split(' ').join('-')
     if(data.position) finalData.position = data.position
     if(data.bitrate) finalData.bitrate = data.bitrate

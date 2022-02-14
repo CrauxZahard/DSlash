@@ -1,5 +1,5 @@
 import Cache from '../../../Cache';
-import Guild from '../../Guild/guild';
+import Guild from '../../Guild/Guild';
 
 export class ClientGuilds extends Cache {
   constructor(client, options) {

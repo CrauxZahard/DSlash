@@ -1,11 +1,17 @@
-import Message from '../Message/Message.js'
-import Channel from './Channel.js'
+import GuildChannel from './GuildChannel.js';
+import ChannelMessages from '../manager/Messages.js';
+import Message from '../../Message/Message.js'
 
-export class DmChannel extends Channel {
+
+export class TextChannel extends GuildChannel {
   constructor(client, rawData) {
-    Object.defineProperty(this, 'client', {value: client})
     super(client, {id: rawData.id, type: rawData.type})
-    this.recipients = rawData.recipients
+    this.guildId = rawData.guildId
+    this.messages = new ChannelMessages(client, {id: rawData.id, options: rawData.options})
+    this.topic = rawData.topic
+    this.nsfw = rawData.nsfw
+    this.lastMessageId = rawData.last_message_id
+    this.rateLimitPerUser = rawData.rate_limit_per_user
   }
   
   
@@ -30,5 +36,6 @@ export class DmChannel extends Channel {
     }
     
   }
-    
+  
+  
 }
